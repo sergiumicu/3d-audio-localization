@@ -1,4 +1,4 @@
-import numpy as np
+import numpy as np, scipy as sp
 import matplotlib.pyplot as plt
 
 class Receiver:
@@ -20,7 +20,7 @@ class Emitter:
         self.signal = signal
 
 def compute_delay(rec: Receiver, em: Emitter, v: float = 343) -> float:
-    return np.linalg.norm(rec.coords - em.coords, 2)
+    return np.linalg.norm(rec.coords - em.coords, 2) / v
 
 def simulate_delay(signal: np.array, delay: float, sample_rate: float) -> np.array:
     """Simulates a delay applied to a signal. Assumes the signal is sampled according to the Nyquist-Shannon Theorem
@@ -39,7 +39,8 @@ def simulate_delay(signal: np.array, delay: float, sample_rate: float) -> np.arr
     delayed_signal: np.array
         The signal, with the simulated delay.
     """
-    pass
+    interpolator = sp.interpolate.interp1d(np.arange(0, len(signal) / sample_rate, 1/sample_rate), signal, fill_value=0, bounds_error=False)
+    return interpolator(np.arange(0, len(signal) / sample_rate, 1/sample_rate) - delay)
 
 def plot_devices(device_list: list[Receiver] | list[Emitter] | Receiver | Emitter, ax: plt.Axes = None, color = 'k', marker = 'o') -> plt.Axes:
     """Plots specified devices 
